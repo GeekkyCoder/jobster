@@ -15,11 +15,11 @@ const getAllJobs = async (req, res) => {
     queryObject.position = { $regex: search, $options: "i" };
   }
 
-  if (status && status!=="all") {
+  if (status && status !== "all") {
     queryObject.status = status;
   }
 
-  if (jobType && jobType!=="all") {
+  if (jobType && jobType !== "all") {
     queryObject.jobType = jobType;
   }
 
@@ -35,9 +35,21 @@ const getAllJobs = async (req, res) => {
     results = results.sort("-position");
   }
 
+  // pagination logic
+  const pages = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+  const skip = (pages - 1) * limit;
+
+  results = results.skip(skip).limit(limit);
+
   const jobs = await results;
-  console.log(jobs);
-  res.status(StatusCodes.OK).json({ jobs, count: jobs.length });
+
+  // helpful to setup pagination setup on frontend
+  const totalJobs = await Job.countDocuments(queryObject);
+  //Math.ceil to get the maximum integer value
+  const numOfPages = Math.ceil(totalJobs / limit);
+
+  res.status(StatusCodes.OK).json({ jobs, totalJobs, numOfPages });
 };
 const getJob = async (req, res) => {
   const {
