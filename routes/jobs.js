@@ -1,16 +1,21 @@
-const express = require('express')
+const express = require("express");
 
-const router = express.Router()
+const router = express.Router();
 const {
   createJob,
   deleteJob,
   getAllJobs,
   updateJob,
   getJob,
-} = require('../controllers/jobs')
+} = require("../controllers/jobs");
+const testUserAuth = require("../middleware/testUserAuth");
 
-router.route('/').post(createJob).get(getAllJobs)
+router.route("/").post(testUserAuth, createJob).get(getAllJobs);
 
-router.route('/:id').get(getJob).delete(deleteJob).patch(updateJob)
+router
+  .route("/:id")
+  .get(getJob)
+  .delete(testUserAuth, deleteJob)
+  .patch(testUserAuth, updateJob);
 
-module.exports = router
+module.exports = router;

@@ -11,6 +11,8 @@ const PageBtnContainer = () => {
     return index + 1;
   });
 
+  // console.log(`pages: ${pages}`)
+
   const nextPage = () => {
     let newPage = page + 1;
     if (newPage > numOfPages) {
