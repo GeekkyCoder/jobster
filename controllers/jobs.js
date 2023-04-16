@@ -1,6 +1,7 @@
 const Job = require("../models/Job");
 const { StatusCodes } = require("http-status-codes");
 const { BadRequestError, NotFoundError } = require("../errors");
+const { default: mongoose } = require("mongoose");
 
 const getAllJobs = async (req, res) => {
   // lookin for the jobs related to user logged in!
@@ -110,10 +111,47 @@ const deleteJob = async (req, res) => {
   res.status(StatusCodes.OK).send();
 };
 
+const showStats = async (req, res) => {
+  let stats = await Job.aggregate([
+    {
+      $match: { createdBy: new mongoose.Types.ObjectId(req.user.userId) },
+    },
+    {
+      $group: { _id: "$status", count: { $sum: 1 } },
+    },
+  ]);
+
+  // console.log(stats)
+
+  // reducing over it to return one object with key being status and values being count
+  // {
+  //   declined:number,
+  //   interview:number,
+  //   pending:number
+  // }
+  stats = stats.reduce((acc, curr) => {
+    const { _id: title, count } = curr;
+    acc[title] = count;
+    return acc;
+  }, {});
+
+  // checks for cases where declined interview and pending are null, means no jobs for current user
+  const defaultStats = {
+    declined: stats.declined || 0,
+    interview: stats.interview || 0,
+    pending: stats.pending || 0,
+  };
+
+  // console.log(defaultStats)
+
+  res.status(StatusCodes.OK).json({ defaultStats, monthlyApplications: [] });
+};
+
 module.exports = {
   createJob,
   deleteJob,
   getAllJobs,
   updateJob,
   getJob,
+  showStats,
 };
