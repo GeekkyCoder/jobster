@@ -1,4 +1,6 @@
 const express = require("express");
+const mongoose = require("mongoose")
+const moment = require("moment")
 
 const router = express.Router();
 const {
@@ -7,10 +9,12 @@ const {
   getAllJobs,
   updateJob,
   getJob,
+  showStats,
 } = require("../controllers/jobs");
 const testUserAuth = require("../middleware/testUserAuth");
 
 router.route("/").post(testUserAuth, createJob).get(getAllJobs);
+router.route("/stats").get(showStats)
 
 router
   .route("/:id")
