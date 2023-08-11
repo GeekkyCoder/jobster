@@ -9,14 +9,14 @@ const xss = require("xss-clean");
 const express = require("express");
 const app = express();
 
-const connectDB = require("./db/connect");
-const authenticateUser = require("./middleware/authentication");
+const connectDB = require("./api/db/connect");
+const authenticateUser = require("./api/middleware/authentication");
 // routers
-const authRouter = require("./routes/auth");
-const jobsRouter = require("./routes/jobs");
+const authRouter = require("./api/routes/auth");
+const jobsRouter = require("./api/routes/jobs");
 // error handler
-const notFoundMiddleware = require("./middleware/not-found");
-const errorHandlerMiddleware = require("./middleware/error-handler");
+const notFoundMiddleware = require("./api/middleware/not-found");
+const errorHandlerMiddleware = require("./api/middleware/error-handler");
 
 app.set("trust proxy", 1);
 
