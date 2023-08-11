@@ -2,6 +2,7 @@ const Job = require("../models/Job");
 const { StatusCodes } = require("http-status-codes");
 const { BadRequestError, NotFoundError } = require("../errors");
 const { default: mongoose } = require("mongoose");
+const moment = require("moment");
 
 const getAllJobs = async (req, res) => {
   // lookin for the jobs related to user logged in!
@@ -144,7 +145,39 @@ const showStats = async (req, res) => {
 
   // console.log(defaultStats)
 
-  res.status(StatusCodes.OK).json({ defaultStats, monthlyApplications: [] });
+  let monthlyApplications = await Job.aggregate([
+    {
+      $match: { createdBy: new mongoose.Types.ObjectId(req.user.userId) },
+    },
+    {
+      $group: {
+        _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } },
+        count: { $sum: 1 },
+      },
+    },
+    {
+      $sort: { "_id.year": -1, id_month: -1 },
+    },
+    {
+      $limit: 6,
+    },
+  ]);
+
+  // console.log(monthlyApplications);
+
+  monthlyApplications = monthlyApplications.map((item) => {
+    const {
+      _id: { year, month },
+      count,
+    } = item;
+    const date = moment().month(month-1).year(year).format("MMM Y");
+    return { count, date };
+  });
+
+  // console.log(monthlyApplications);
+
+
+  res.status(StatusCodes.OK).json({ defaultStats, monthlyApplications });
 };
 
 module.exports = {
