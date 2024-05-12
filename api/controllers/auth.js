@@ -50,7 +50,7 @@ const updateUser = async (req, res) => {
   const { name, email, location, lastName } = req.body;
 
   if (!name || !email || !location || !lastName) {
-    throw new BadRequestError("plz provide all values");
+    throw new Error("please provide all values")
   }
 
   const updatedUser = await User.findOneAndUpdate(
